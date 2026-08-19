@@ -1,0 +1,32 @@
+# Jalankan cepat:  docker compose up
+# Import schema ke container db sekali:
+#   docker compose exec -T db mysql -u root -proot db_absensi < database/schema.sql
+services:
+  web:
+    image: php:8.2-apache
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      DB_HOST: db
+      DB_NAME: db_absensi
+      DB_USER: root
+      DB_PASS: root
+    command: >
+      sh -c "docker-php-ext-install pdo_mysql
+             && a2enmod rewrite
+             && apache2-foreground"
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: db_absensi
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

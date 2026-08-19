@@ -1,0 +1,7 @@
+# File foto bukti absensi (hasil runtime, bukan source code)
+uploads/*
+!uploads/.gitkeep
+
+# Sistem
+.DS_Store
+Thumbs.db
