@@ -18,8 +18,23 @@ if (!empty($_SESSION['user'])) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.4.1/dist/css/adminlte.min.css">
+  <style>
+    body.login-page {
+      background: linear-gradient(135deg, #0d1b2a 0%, #1b3a5c 50%, #0d6efd 100%);
+      min-height: 100vh;
+    }
+    .login-box { width: 380px; }
+    .login-logo a { color: #fff; text-decoration: none; text-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .login-box .card { box-shadow: 0 10px 30px rgba(0,0,0,.35); border: 0; }
+    .brand-mark {
+      width: 64px; height: 64px; margin: 0 auto 1rem; border-radius: 18px;
+      background: linear-gradient(135deg, #0d6efd, #20c997);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 32px; box-shadow: 0 6px 18px rgba(13,110,253,.4);
+    }
+  </style>
 </head>
-<body class="login-page bg-body-secondary">
+<body class="login-page">
 
 <div class="login-box">
   <div class="login-logo">
@@ -27,6 +42,7 @@ if (!empty($_SESSION['user'])) {
   </div>
   <div class="card">
     <div class="card-body login-card-body">
+      <div class="brand-mark"><i class="bi bi-fingerprint"></i></div>
       <p class="login-box-msg">Masuk ke panel admin</p>
 
       <div id="alert" class="alert alert-danger d-none" role="alert"></div>

@@ -25,10 +25,14 @@ require __DIR__ . '/includes/header.php';
           </select>
         </div>
 
-        <!-- Bingkai webcam + overlay canvas untuk kotak deteksi -->
+        <!-- Bingkai webcam + overlay canvas + spinner saat model dimuat -->
         <div class="position-relative d-inline-block">
           <video id="webcam" width="640" height="360" class="rounded bg-dark" autoplay muted playsinline></video>
           <canvas id="overlay" class="position-absolute top-0 start-0"></canvas>
+          <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center rounded bg-dark bg-opacity-75 text-white gap-2" id="loading">
+            <div class="spinner-border" role="status"></div>
+            <div>Memuat model AI...</div>
+          </div>
         </div>
       </div>
       <div class="card-footer">
@@ -68,9 +72,13 @@ require __DIR__ . '/includes/header.php';
 $page_scripts   = ['https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js'];
 $page_inline_js = <<<'JS'
 const MODEL_URL = './models';   // folder berisi weights face-api.js (lokal, offline-friendly)
+// inputSize 224 (bukan default 416) = deteksi jauh lebih cepat
+const OPSI_DETEKSI = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
+
 const video     = document.getElementById('webcam');
 const overlay   = document.getElementById('overlay');
 const statusEl  = document.getElementById('status');
+const loadingEl = document.getElementById('loading');
 const btnCam    = document.getElementById('btn-cam');
 const btnCap    = document.getElementById('btn-capture');
 const selectKry = document.getElementById('select-karyawan');
@@ -84,6 +92,7 @@ async function muatModel() {
     faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
     faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
   ]);
+  loadingEl.style.display = 'none';
   statusEl.textContent = 'Model siap.';
 }
 
@@ -119,8 +128,9 @@ async function deteksiRealtime() {
   const ukuran = { width: overlay.width, height: overlay.height };
 
   setInterval(async () => {
+    if (document.hidden) return;        // hemat CPU saat tab tidak aktif
     const hasil = await faceapi
-      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+      .detectAllFaces(video, OPSI_DETEKSI)
       .withFaceLandmarks();
     if (!hasil) return;
     const gambar = faceapi.resizeResults(hasil, ukuran);
@@ -128,7 +138,7 @@ async function deteksiRealtime() {
     ctx.clearRect(0, 0, overlay.width, overlay.height);
     faceapi.draw.drawDetections(overlay, gambar);
     faceapi.draw.drawFaceLandmarks(overlay, gambar);
-  }, 400);
+  }, 500);
 }
 
 // --- Ambil 1 descriptor & kirim ke API -------------------------------
@@ -138,7 +148,7 @@ btnCap.addEventListener('click', async () => {
 
   statusEl.textContent = 'Memindai wajah...';
   const deteksi = await faceapi
-    .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+    .detectSingleFace(video, OPSI_DETEKSI)
     .withFaceLandmarks()
     .withFaceDescriptor();              // -> Float32Array(128)
 

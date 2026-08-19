@@ -48,6 +48,11 @@ if ($method !== 'POST') {
 $body   = get_json_body();
 $userId = $body['user_id'] ?? null;
 $foto   = $body['foto'] ?? null;
+// Opsional: 'masuk' | 'pulang'. Tanpa nilai -> server putuskan otomatis.
+$tipe   = $body['tipe'] ?? 'auto';
+if (!in_array($tipe, ['masuk', 'pulang', 'auto'], true)) {
+    json_response(['success' => false, 'message' => 'Tipe tidak valid.'], 422);
+}
 
 if (!$userId) {
     json_response(['success' => false, 'message' => 'user_id wajib diisi.'], 422);
@@ -72,7 +77,18 @@ $absen = $cekAbs->fetch();
 
 $fotoName = save_snapshot(is_string($foto) ? $foto : null);
 
-if (!$absen) {
+// ---- Tentukan tipe efektif bila 'auto' -------------------------------
+$efektif = $tipe;
+if ($tipe === 'auto') {
+    if (!$absen)                          { $efektif = 'masuk'; }
+    elseif (empty($absen['jam_pulang']))  { $efektif = 'pulang'; }
+    else { $efektif = 'penuh'; }
+}
+
+if ($efektif === 'masuk') {
+    if ($absen && !empty($absen['jam_masuk'])) {
+        json_response(['success' => false, 'message' => $user['nama'] . ' sudah absen masuk hari ini.', 'data' => ['tipe' => 'masuk']], 409);
+    }
     // ------------------------- ABSEN MASUK -------------------------
     $status = ($jamNow > $jamBatas) ? 'terlambat' : 'hadir';
     $stmt = $pdo->prepare(
@@ -93,7 +109,13 @@ if (!$absen) {
     ]);
 }
 
-if (empty($absen['jam_pulang'])) {
+if ($efektif === 'pulang') {
+    if (!$absen || empty($absen['jam_masuk'])) {
+        json_response(['success' => false, 'message' => $user['nama'] . ' belum absen masuk hari ini.', 'data' => ['tipe' => 'pulang']], 409);
+    }
+    if (!empty($absen['jam_pulang'])) {
+        json_response(['success' => false, 'message' => $user['nama'] . ' sudah absen pulang hari ini.', 'data' => ['tipe' => 'pulang']], 409);
+    }
     // ------------------------- ABSEN PULANG ------------------------
     $stmt = $pdo->prepare(
         'UPDATE absensi SET jam_pulang = ?, foto_bukti = COALESCE(?, foto_bukti)
@@ -113,7 +135,7 @@ if (empty($absen['jam_pulang'])) {
     ]);
 }
 
-// Sudah absen masuk & pulang hari ini
+// Sudah absen masuk & pulang hari ini (mode auto)
 json_response([
     'success' => false,
     'message' => $user['nama'] . ' sudah absen masuk dan pulang hari ini.',

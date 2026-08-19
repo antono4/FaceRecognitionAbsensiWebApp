@@ -11,15 +11,16 @@ require __DIR__ . '/includes/header.php';
 ?>
 
 <div class="card">
-  <div class="card-header">
-    <h3 class="card-title">Daftar Karyawan</h3>
-    <div class="card-tools">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <h3 class="card-title mb-0"><i class="bi bi-people-fill"></i> Daftar Karyawan</h3>
+    <div class="d-flex gap-2">
+      <input type="search" class="form-control form-control-sm" id="cari" placeholder="Cari nama / username..." style="width:220px">
       <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-form" onclick="bukaTambah()">
         <i class="bi bi-plus-lg"></i> Tambah Karyawan
       </button>
     </div>
   </div>
-  <div class="card-body p-0">
+  <div class="card-body p-0 table-responsive">
     <table class="table table-striped table-hover mb-0">
       <thead>
         <tr>
@@ -82,11 +83,8 @@ const modal      = new bootstrap.Modal(document.getElementById('modal-form'));
 const modalAlert = document.getElementById('modal-alert');
 let daftar       = [];
 
-async function muatTabel() {
-  const res = await fetch('api/karyawan.php');
-  const j   = await res.json();
-  daftar    = j.data ?? [];
-  tbody.innerHTML = daftar.length ? daftar.map((k, i) => `
+function renderTabel(list) {
+  tbody.innerHTML = list.length ? list.map((k, i) => `
     <tr>
       <td>${i + 1}</td>
       <td>${k.nama}</td>
@@ -100,8 +98,23 @@ async function muatTabel() {
         <button class="btn btn-danger btn-sm" onclick="hapus(${k.id})"><i class="bi bi-trash"></i></button>
         <a class="btn btn-info btn-sm" href="registrasi_wajah.php?id=${k.id}" title="Registrasi wajah"><i class="bi bi-camera"></i></a>
       </td>
-    </tr>`).join('') : '<tr><td colspan="6" class="text-center">Belum ada karyawan.</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="6" class="text-center text-muted py-3">Belum ada karyawan.</td></tr>';
 }
+
+async function muatTabel() {
+  const res = await fetch('api/karyawan.php');
+  const j   = await res.json();
+  daftar    = j.data ?? [];
+  renderTabel(daftar);
+}
+
+// Pencarian client-side (tidak membebani server)
+document.getElementById('cari').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  renderTabel(daftar.filter(k =>
+    k.nama.toLowerCase().includes(q) || k.username.toLowerCase().includes(q)
+  ));
+});
 
 function bukaTambah() { resetForm('Tambah Karyawan'); }
 

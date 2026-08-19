@@ -17,6 +17,10 @@ face-api.js client-side.
 - Endpoint admin wajib memanggil `require_admin()`; halaman admin wajib `auth_check.php`.
 - Ambang kecocokan wajah: distance < 0.6 (konstanta `THRESHOLD` di `absen.php`).
 - Batas jam masuk: konstanta `JAM_MASUK` di `config/config.php` (env-override).
+- `api/absen.php` menerima opsi `tipe`: `masuk` / `pulang` / `auto` (default).
+- Performa deteksi: `TinyFaceDetectorOptions({ inputSize: 224 })` (default 416 berat);
+  loop 800ms di kiosk, 500ms di registrasi; skip saat `document.hidden`.
+- Halaman web: spinner di-overlay saat model dimuat.
 
 ## Uji Cepat (Docker)
 

@@ -87,7 +87,7 @@ docker compose exec -T db mysql -uroot -proot db_absensi < database/schema.sql
 | PUT    | `api/karyawan.php`    | admin | ubah data |
 | DELETE | `api/karyawan.php?id=`| admin | hapus (absensi ikut terhapus, cascade) |
 | GET    | `api/get_faces.php`   | publik| descriptor semua karyawan untuk FaceMatcher |
-| POST   | `api/absen.php`       | publik| `{user_id, foto(base64 data-URL)}` — masuk/pulang otomatis |
+| POST   | `api/absen.php`       | publik| `{user_id, foto, tipe?}` — tipe `masuk`/`pulang` eksplisit atau `auto` (default) |
 | GET    | `api/absen.php`       | admin | rekap, filter `user_id`, `dari`, `sampai` |
 
 Semua response berformat JSON: `{success, message, data}`.
