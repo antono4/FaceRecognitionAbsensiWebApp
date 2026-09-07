@@ -1,2 +1,30 @@
-Last updated: 2026-09-07 13:00:03 WIB
-Last updated: 2026-09-07 13:04:25 WIB
+# FaceRecognitionAbsensiWebApp
+
+
+
+## 📋 Overview
+
+This repository contains **37 files** and is built with the following technologies:
+
+PHP
+
+## 🚀 Quick Start
+
+```bash
+php -S localhost:8000
+```
+
+## ✨ Features
+
+- 📝 Auto-generated documentation
+
+## 🛠️ Technologies
+
+PHP
+
+## 📄 License
+
+MIT License
+
+---
+*Last updated: 2026-09-07 15:39:36 WIB*
